@@ -1,29 +1,24 @@
--- === Load Rayfield ===
+-- ===== Fox Script Loader =====
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
--- === Buat Window Utama ===
 local Window = Rayfield:CreateWindow({
     Name = "Fox",
-    Icon = 0,
     LoadingTitle = "Fox Loader",
     LoadingSubtitle = "by Fox",
     ShowText = "Fox Script",
     Theme = "Ocean",
     ToggleUIKeybind = Enum.KeyCode.K,
-    DisableRayfieldPrompts = true,
     KeySystem = false,
-    KeySettings = {},
-    ConfigurationSaving = { 
-        Enabled = true, 
-        FolderName = "FoxConfigs", 
-        FileName = "FoxConfig" 
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "FoxConfigs",
+        FileName = "FoxConfig"
     }
 })
 
--- === Tab Arunika V2 ===
-local arunikaTab = Window:CreateTab("Arunika V2", 4483362458)
+-- ===== Tab Arunika V2 =====
+local arunikaTab = Window:CreateTab("Arunika V2")
 
--- Tombol Run Auto Arunika
 arunikaTab:CreateButton({
     Name = "Run Auto Arunika",
     Callback = function()
@@ -36,45 +31,69 @@ arunikaTab:CreateButton({
     end
 })
 
--- === DAUN V2 ===
+-- ===== Tab Daun V2 =====
+local daunTab = Window:CreateTab("Daun V2")
 local RunDaunV2ButtonEnabled = true
-CreateMenuButton(arunikaTab, "Auto Walk Daun V2", function()
-    if not RunDaunV2ButtonEnabled then
+
+daunTab:CreateButton({
+    Name = "Auto Walk Daun V2",
+    Callback = function()
+        if not RunDaunV2ButtonEnabled then
+            Rayfield:Notify({
+                Title = "Daun V2",
+                Content = "⚠️ Fitur sudah dijalankan!",
+                Duration = 4
+            })
+            return
+        end
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/lovllo/howtoforgetyou/main/dan.lua"))()
         Rayfield:Notify({
-            Title = "Run Walk Daun",
-            Content = "⚠️ Fitur ini sudah dijalankan / dikunci!",
+            Title = "Daun V2",
+            Content = "✅ Script berhasil dijalankan!",
             Duration = 4
         })
-        return
+        RunDaunV2ButtonEnabled = false
     end
+})
 
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/lovllo/howtoforgetyou/main/dan.lua"))()
+-- ===== Tab Antartika =====
+local antartikaTab = Window:CreateTab("Antartika")
 
-    Rayfield:Notify({
-        Title = "Run Walk Daun",
-        Content = "✅ Script berhasil dijalankan!",
-        Duration = 4
-    })
-
-    RunDaunV2ButtonEnabled = false
-end)
-
--- === Tab Antartika ===
-local antartikaTab = Window:CreateTab("Antartika", 4483362458)
-
--- Variabel untuk kontrol RunSummit
 local running = false
+local currentPos = 1
 local lastDrink = 0
 local lastRefill = 0
-local currentPos = 1
-local player = game:GetService("Players").LocalPlayer
+local positions = {
+    Vector3.new(-3719, 225, 234),
+    Vector3.new(1790, 105, -138),
+    Vector3.new(5892, 321, -20),
+    Vector3.new(8992, 596, 103),
+    Vector3.new(11002, 549, 128)
+}
 
--- Fungsi RunSummit
-local function RunSummit()
-    local data = player:WaitForChild("Expedition Data", 10)
-    if not data then
-        warn("Expedition Data not found")
+local refillMap = {
+    [1] = "Refill1",
+    [2] = "Refill2",
+    [3] = "Refill3",
+    [4] = "Refill4",
+    [5] = "Refill5"
+}
+
+local function TeleportTo(pos)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(pos)
     end
+end
+
+local function AutoDrink()
+    -- contoh auto drink
+    print("Auto minum dijalankan")
+end
+
+local function RunSummit()
+    local player = game.Players.LocalPlayer
+    local data = player:WaitForChild("Expedition Data",10)
     local coins = data and data:FindFirstChild("Coins")
     local lastCoin = coins and coins.Value or 0
 
@@ -83,13 +102,15 @@ local function RunSummit()
     while running do
         local now = tick()
 
+        -- auto minum setiap 30 detik
         if now - lastDrink >= 30 then
             AutoDrink()
             lastDrink = now
         end
 
+        -- auto refill setiap 3 menit
         if now - lastRefill >= 180 then
-            local refillFolder = Workspace:FindFirstChild("Locally_Imported_Parts")
+            local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
             if refillFolder then
                 local targetRefillName = refillMap[currentPos]
                 if targetRefillName and refillFolder:FindFirstChild(targetRefillName) then
@@ -109,10 +130,11 @@ local function RunSummit()
             lastRefill = now
         end
 
+        -- cek coin
         if coins and coins.Value > lastCoin then
             lastCoin = coins.Value
             if currentPos >= #positions then
-                TeleportTo(Vector3.new(10952, 313, 122))
+                TeleportTo(Vector3.new(10952,313,122))
                 pcall(function() if player.Character then player.Character:BreakJoints() end end)
                 player.CharacterAdded:Wait()
                 task.wait(1)
@@ -124,6 +146,7 @@ local function RunSummit()
             end
         end
 
+        -- pola maju-mundur
         local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if charHRP then
             charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
@@ -140,39 +163,30 @@ local function RunSummit()
     end
 end
 
--- Tombol Start RunSummit
-CreateMenuButton(antartikaTab, "Start Antartika Run", function()
-    if running then
+antartikaTab:CreateButton({
+    Name = "Start Antartika Run",
+    Callback = function()
+        running = true
+        task.spawn(RunSummit)
         Rayfield:Notify({
             Title = "Antartika",
-            Content = "⚠️ Sudah berjalan!",
-            Duration = 3
+            Content = "✅ RunSummit dimulai!",
+            Duration = 4
         })
-        return
     end
+})
 
-    running = true
-    Rayfield:Notify({
-        Title = "Antartika",
-        Content = "✅ RunSummit Antartika dimulai!",
-        Duration = 3
-    })
+antartikaTab:CreateButton({
+    Name = "Stop Antartika Run",
+    Callback = function()
+        running = false
+        Rayfield:Notify({
+            Title = "Antartika",
+            Content = "⛔ RunSummit dihentikan!",
+            Duration = 4
+        })
+    end
+})
 
-    coroutine.wrap(function()
-        RunSummit()
-    end)()
-end)
-
--- Tombol Stop RunSummit
-CreateMenuButton(antartikaTab, "Stop Antartika Run", function()
-    if not running then return end
-    running = false
-    Rayfield:Notify({
-        Title = "Antartika",
-        Content = "⛔ RunSummit Antartika dihentikan!",
-        Duration = 3
-    })
-end)
-
--- Load konfigurasi Rayfield
+-- ===== Load Configuration =====
 Rayfield:LoadConfiguration()
