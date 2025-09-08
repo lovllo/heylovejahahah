@@ -1,4 +1,4 @@
--- ===== Fox Antartika FINAL 100% Pastebin =====
+-- ===== Fox Antartika FINAL AutoDrink + Refill =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
@@ -12,7 +12,6 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = { Enabled = true, FolderName = "FoxConfigs", FileName = "FoxConfig" }
 })
 
--- Tab Antartika
 local antartikaTab = Window:CreateTab("Antartika")
 local running = false
 local currentPos = 1
@@ -44,20 +43,28 @@ local function TeleportTo(pos)
     end
 end
 
--- ===== AutoDrink =====
+-- ===== AutoDrink dari hotbar posisi 2 =====
 local function AutoDrink()
-    local backpack = player:FindFirstChild("Backpack")
     local char = player.Character
-    if backpack and char then
-        local drink = backpack:FindFirstChild("WaterBottle")
-        if drink then
-            drink:Activate()
-            print("✅ Auto minum dijalankan")
+    if not char then return end
+
+    local tools = {}
+    for _, t in ipairs(char:GetChildren()) do
+        if t:IsA("Tool") then
+            table.insert(tools, t)
         end
+    end
+
+    local drink = tools[2] -- hotbar urutan kedua
+    if drink and drink.Name == "WaterBottle" then
+        player.Character.Humanoid:EquipTool(drink)
+        task.wait(0.1)
+        drink:Activate()
+        print("✅ Auto minum / refill dijalankan dari hotbar posisi 2")
     end
 end
 
--- ===== RunSummit FINAL Pastebin =====
+-- ===== RunSummit FINAL =====
 local function RunSummit()
     local data = player:WaitForChild("Expedition Data",10)
     if not data then warn("Expedition Data not found") return end
@@ -77,13 +84,14 @@ local function RunSummit()
             lastDrink = now
         end
 
-        -- Auto refill tiap 3 menit (180 detik)
+        -- Auto refill tiap 3 menit
         if now - lastRefill >= 180 then
             local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
             if refillFolder then
                 local targetRefillName = refillMap[currentPos]
                 local target = refillFolder:FindFirstChild(targetRefillName)
                 if target then
+                    AutoDrink() -- pastikan pegang WaterBottle
                     local prevPos = player.Character.HumanoidRootPart.Position
                     TeleportTo(target.Position)
                     task.wait(0.5)
@@ -108,7 +116,7 @@ local function RunSummit()
             Rayfield:Notify({Title="Antartika Progress", Content="Pos "..currentPos.." / "..totalPositions, Duration=2})
         end
 
-        -- Pola maju-mundur tiap posisi (2x sesuai Pastebin)
+        -- Pola maju-mundur tiap posisi
         local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if charHRP then
             charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
@@ -125,16 +133,13 @@ local function RunSummit()
 
         -- Respawn otomatis setelah Pos 5 selesai
         if currentPos >= totalPositions then
-            TeleportTo(positions[currentPos])
-            task.wait(5)
-            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.CFrame = hrp.CFrame * CFrame.new(0,0,10)
+            local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if charHRP then
+                charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
                 task.wait(5)
                 TeleportTo(positions[currentPos])
                 task.wait(5)
             end
-            -- respawn
             TeleportTo(Vector3.new(10952, 313, 122))
             pcall(function() if player.Character then player.Character:BreakJoints() end end)
             player.CharacterAdded:Wait()
