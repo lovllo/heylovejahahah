@@ -48,19 +48,42 @@ local function AutoDrink()
     local char = player.Character
     if not char then return end
 
-    local tools = {}
-    for _, t in ipairs(char:GetChildren()) do
-        if t:IsA("Tool") then
-            table.insert(tools, t)
-        end
-    end
-
-    local drink = tools[2] -- hotbar urutan kedua
-    if drink and drink.Name == "WaterBottle" then
+    local drink = char:FindFirstChild("WaterBottle") or player.Backpack:FindFirstChild("WaterBottle")
+    if drink then
         player.Character.Humanoid:EquipTool(drink)
-        task.wait(0.1)
+        task.wait(0.15)
         drink:Activate()
-        print("✅ Auto minum / refill dijalankan dari hotbar posisi 2")
+        Rayfield:Notify({
+            Title = "Antartika AutoDrink",
+            Content = "💧 Minum WaterBottle dari hotbar 2!",
+            Duration = 2
+        })
+    end
+end
+
+-- ===== Refill =====
+local function Refill()
+    local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
+    if refillFolder then
+        local targetRefillName = refillMap[currentPos]
+        local target = refillFolder:FindFirstChild(targetRefillName)
+        if target then
+            AutoDrink() -- pastikan pegang WaterBottle
+            local prevPos = player.Character.HumanoidRootPart.Position
+            TeleportTo(target.Position)
+            task.wait(0.5)
+            local char = player.Character
+            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,-5)
+            task.wait(0.5)
+            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
+            task.wait(0.5)
+            TeleportTo(prevPos)
+            Rayfield:Notify({
+                Title = "Antartika Refill",
+                Content = "🔄 Refill dijalankan di Pos "..currentPos,
+                Duration = 2
+            })
+        end
     end
 end
 
@@ -86,23 +109,7 @@ local function RunSummit()
 
         -- Auto refill tiap 3 menit
         if now - lastRefill >= 180 then
-            local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
-            if refillFolder then
-                local targetRefillName = refillMap[currentPos]
-                local target = refillFolder:FindFirstChild(targetRefillName)
-                if target then
-                    AutoDrink() -- pastikan pegang WaterBottle
-                    local prevPos = player.Character.HumanoidRootPart.Position
-                    TeleportTo(target.Position)
-                    task.wait(0.5)
-                    local char = player.Character
-                    char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,-5)
-                    task.wait(0.5)
-                    char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
-                    task.wait(0.5)
-                    TeleportTo(prevPos)
-                end
-            end
+            Refill()
             lastRefill = now
         end
 
@@ -133,13 +140,6 @@ local function RunSummit()
 
         -- Respawn otomatis setelah Pos 5 selesai
         if currentPos >= totalPositions then
-            local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if charHRP then
-                charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
-                task.wait(5)
-                TeleportTo(positions[currentPos])
-                task.wait(5)
-            end
             TeleportTo(Vector3.new(10952, 313, 122))
             pcall(function() if player.Character then player.Character:BreakJoints() end end)
             player.CharacterAdded:Wait()
