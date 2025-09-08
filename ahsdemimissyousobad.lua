@@ -1,10 +1,10 @@
--- ===== Fox Antartika Full System =====
+-- ===== Fox Antartika Final Loader =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Fox Antartika",
     LoadingTitle = "Fox Loader",
-    LoadingSubtitle = "Antartika Special",
+    LoadingSubtitle = "Antartika Final",
     ShowText = "Fox Script",
     Theme = "Ocean",
     ToggleUIKeybind = Enum.KeyCode.K,
@@ -48,8 +48,9 @@ local function AutoDrink()
     print("Auto minum dijalankan")
 end
 
+-- ===== RunSummit persis seperti Pastebin =====
 local function RunSummit()
-    local data = player:WaitForChild("Expedition Data", 10)
+    local data = player:WaitForChild("Expedition Data",10)
     if not data then warn("Expedition Data not found") return end
     local coins = data:FindFirstChild("Coins")
     local lastCoin = coins and coins.Value or 0
@@ -89,12 +90,16 @@ local function RunSummit()
             lastRefill = now
         end
 
-        -- Cek coin / progress log
+        -- Cek coin dan update posisi
         if coins and coins.Value > lastCoin then
             lastCoin = coins.Value
             if currentPos >= totalPositions then
-                Rayfield:Notify({Title="Antartika", Content="🎯 Sampai summit!", Duration=3})
-                running = false
+                TeleportTo(Vector3.new(10952, 313, 122)) -- respawn di summit
+                pcall(function() if player.Character then player.Character:BreakJoints() end end)
+                player.CharacterAdded:Wait()
+                task.wait(1)
+                currentPos = 1
+                TeleportTo(positions[currentPos])
             else
                 currentPos = currentPos + 1
                 TeleportTo(positions[currentPos])
@@ -102,7 +107,7 @@ local function RunSummit()
             Rayfield:Notify({Title="Antartika Progress", Content="Pos "..currentPos.." / "..totalPositions, Duration=2})
         end
 
-        -- Pola maju-mundur tiap posisi (sama seperti script asli Pastebin)
+        -- Pola maju-mundur tiap posisi (sama persis Pastebin)
         local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if charHRP then
             charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
@@ -137,7 +142,7 @@ antartikaTab:CreateButton({
     end
 })
 
--- Tombol teleport langsung Pos 1–5 (AMAN, tidak bypass sistem)
+-- Tombol teleport langsung Pos 1–5 (AMAN)
 for i, pos in ipairs(positions) do
     antartikaTab:CreateButton({
         Name = "Teleport Pos "..i,
