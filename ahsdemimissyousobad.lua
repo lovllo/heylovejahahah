@@ -1,10 +1,10 @@
--- ===== Fox Antartika Final Loader =====
+-- ===== Fox Antartika FINAL =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Fox Antartika",
     LoadingTitle = "Fox Loader",
-    LoadingSubtitle = "Antartika Final",
+    LoadingSubtitle = "Antartika FINAL",
     ShowText = "Fox Script",
     Theme = "Ocean",
     ToggleUIKeybind = Enum.KeyCode.K,
@@ -44,11 +44,20 @@ local function TeleportTo(pos)
     end
 end
 
+-- ===== AutoDrink =====
 local function AutoDrink()
-    print("Auto minum dijalankan")
+    local backpack = player:FindFirstChild("Backpack")
+    local char = player.Character
+    if backpack and char then
+        local drink = backpack:FindFirstChild("WaterBottle")
+        if drink then
+            drink:Activate()
+            print("✅ Auto minum dijalankan")
+        end
+    end
 end
 
--- ===== RunSummit persis seperti Pastebin =====
+-- ===== RunSummit FINAL =====
 local function RunSummit()
     local data = player:WaitForChild("Expedition Data",10)
     if not data then warn("Expedition Data not found") return end
@@ -62,29 +71,28 @@ local function RunSummit()
     while running do
         local now = tick()
 
-        -- Auto minum setiap 30 detik
+        -- Auto minum
         if now - lastDrink >= 30 then
             AutoDrink()
             lastDrink = now
         end
 
-        -- Auto refill setiap 3 menit
+        -- Auto refill tiap 3 menit
         if now - lastRefill >= 180 then
             local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
             if refillFolder then
                 local targetRefillName = refillMap[currentPos]
-                if targetRefillName and refillFolder:FindFirstChild(targetRefillName) then
-                    local prevPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
-                    TeleportTo(refillFolder[targetRefillName].Position)
+                local target = refillFolder:FindFirstChild(targetRefillName)
+                if target then
+                    local prevPos = player.Character.HumanoidRootPart.Position
+                    TeleportTo(target.Position)
                     task.wait(0.5)
                     local char = player.Character
-                    if char and char:FindFirstChild("HumanoidRootPart") then
-                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,-5)
-                        task.wait(0.5)
-                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
-                        task.wait(0.5)
-                    end
-                    if prevPos then TeleportTo(prevPos) end
+                    char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,-5)
+                    task.wait(0.5)
+                    char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
+                    task.wait(0.5)
+                    TeleportTo(prevPos)
                 end
             end
             lastRefill = now
@@ -93,21 +101,14 @@ local function RunSummit()
         -- Cek coin dan update posisi
         if coins and coins.Value > lastCoin then
             lastCoin = coins.Value
-            if currentPos >= totalPositions then
-                TeleportTo(Vector3.new(10952, 313, 122)) -- respawn di summit
-                pcall(function() if player.Character then player.Character:BreakJoints() end end)
-                player.CharacterAdded:Wait()
-                task.wait(1)
-                currentPos = 1
-                TeleportTo(positions[currentPos])
-            else
+            if currentPos < totalPositions then
                 currentPos = currentPos + 1
                 TeleportTo(positions[currentPos])
             end
             Rayfield:Notify({Title="Antartika Progress", Content="Pos "..currentPos.." / "..totalPositions, Duration=2})
         end
 
-        -- Pola maju-mundur tiap posisi (sama persis Pastebin)
+        -- Pola maju-mundur tiap posisi
         local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if charHRP then
             charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
@@ -120,6 +121,27 @@ local function RunSummit()
             task.wait(5)
         else
             task.wait(1)
+        end
+
+        -- Respawn otomatis setelah Pos 5 selesai
+        if currentPos >= totalPositions then
+            TeleportTo(positions[currentPos])
+            task.wait(5)
+            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = hrp.CFrame * CFrame.new(0,0,10)
+                task.wait(5)
+                TeleportTo(positions[currentPos])
+                task.wait(5)
+            end
+            -- respawn otomatis
+            TeleportTo(Vector3.new(10952, 313, 122))
+            pcall(function() if player.Character then player.Character:BreakJoints() end end)
+            player.CharacterAdded:Wait()
+            task.wait(1)
+            currentPos = 1
+            TeleportTo(positions[currentPos])
+            Rayfield:Notify({Title="Antartika", Content="🔁 Respawn otomatis, mulai Pos 1 lagi", Duration=3})
         end
     end
 end
@@ -142,7 +164,7 @@ antartikaTab:CreateButton({
     end
 })
 
--- Tombol teleport langsung Pos 1–5 (AMAN)
+-- Tombol teleport langsung Pos 1–5
 for i, pos in ipairs(positions) do
     antartikaTab:CreateButton({
         Name = "Teleport Pos "..i,
