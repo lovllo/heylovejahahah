@@ -1,4 +1,4 @@
--- ===== Fox Antartika with Direct Teleport =====
+-- ===== Fox Antartika Complete Loader =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
@@ -40,7 +40,7 @@ local totalPositions = #positions
 local function TeleportTo(pos)
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
-        hrp.CFrame = CFrame.new(pos) + Vector3.new(0,5,0) -- offset 5 supaya tidak jatuh
+        hrp.CFrame = CFrame.new(pos) + Vector3.new(0,5,0) -- offset 5 supaya aman
     end
 end
 
@@ -144,7 +144,7 @@ antartikaTab:CreateButton({
     end
 })
 
--- Tombol langsung teleport ke Pos 1–5
+-- Tombol langsung teleport ke Pos 1–5 di loader
 for i, pos in ipairs(positions) do
     antartikaTab:CreateButton({
         Name = "Teleport Pos "..i,
