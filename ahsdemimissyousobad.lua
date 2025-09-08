@@ -1,4 +1,4 @@
--- ===== Fox Antartika FINAL =====
+-- ===== Fox Antartika FINAL 100% Pastebin =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
@@ -57,7 +57,7 @@ local function AutoDrink()
     end
 end
 
--- ===== RunSummit FINAL =====
+-- ===== RunSummit FINAL Pastebin =====
 local function RunSummit()
     local data = player:WaitForChild("Expedition Data",10)
     if not data then warn("Expedition Data not found") return end
@@ -71,13 +71,13 @@ local function RunSummit()
     while running do
         local now = tick()
 
-        -- Auto minum
+        -- Auto minum tiap 30 detik
         if now - lastDrink >= 30 then
             AutoDrink()
             lastDrink = now
         end
 
-        -- Auto refill tiap 3 menit
+        -- Auto refill tiap 3 menit (180 detik)
         if now - lastRefill >= 180 then
             local refillFolder = workspace:FindFirstChild("Locally_Imported_Parts")
             if refillFolder then
@@ -108,7 +108,7 @@ local function RunSummit()
             Rayfield:Notify({Title="Antartika Progress", Content="Pos "..currentPos.." / "..totalPositions, Duration=2})
         end
 
-        -- Pola maju-mundur tiap posisi
+        -- Pola maju-mundur tiap posisi (2x sesuai Pastebin)
         local charHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if charHRP then
             charHRP.CFrame = charHRP.CFrame * CFrame.new(0,0,10)
@@ -134,7 +134,7 @@ local function RunSummit()
                 TeleportTo(positions[currentPos])
                 task.wait(5)
             end
-            -- respawn otomatis
+            -- respawn
             TeleportTo(Vector3.new(10952, 313, 122))
             pcall(function() if player.Character then player.Character:BreakJoints() end end)
             player.CharacterAdded:Wait()
