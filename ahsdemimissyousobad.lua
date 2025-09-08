@@ -1,8 +1,8 @@
--- ===== Fox Antartika Progress =====
+-- ===== Fox Antartika with Direct Teleport =====
 local player = game.Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
-    Name = "Fox Antartika Progress",
+    Name = "Fox Antartika",
     LoadingTitle = "Fox Loader",
     LoadingSubtitle = "Antartika Special",
     ShowText = "Fox Script",
@@ -24,7 +24,7 @@ local positions = {
     Vector3.new(1790, 105, -138),
     Vector3.new(5892, 321, -20),
     Vector3.new(8992, 596, 103),
-    Vector3.new(11002, 549, 128)
+    Vector3.new(11002, 555, 128)  -- camp 5 offset Y agar aman
 }
 
 local refillMap = {
@@ -38,9 +38,9 @@ local refillMap = {
 local totalPositions = #positions
 
 local function TeleportTo(pos)
-    local char = player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        char.HumanoidRootPart.CFrame = CFrame.new(pos)
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = CFrame.new(pos) + Vector3.new(0,5,0) -- offset 5 supaya tidak jatuh
     end
 end
 
@@ -93,17 +93,16 @@ local function RunSummit()
         if coins and coins.Value > lastCoin then
             lastCoin = coins.Value
             if currentPos >= totalPositions then
-                TeleportTo(Vector3.new(10952, 313, 122))
-                pcall(function() if player.Character then player.Character:BreakJoints() end end)
-                player.CharacterAdded:Wait()
-                task.wait(1)
-                currentPos = 1
-                TeleportTo(positions[currentPos])
+                Rayfield:Notify({
+                    Title = "Antartika",
+                    Content = "🎯 Sampai summit!",
+                    Duration = 3
+                })
+                running = false  -- stop di summit
             else
                 currentPos = currentPos + 1
                 TeleportTo(positions[currentPos])
             end
-            -- Notifikasi progress
             Rayfield:Notify({
                 Title = "Antartika Progress",
                 Content = "✅ Posisi "..currentPos.." / "..totalPositions,
@@ -128,7 +127,7 @@ local function RunSummit()
     end
 end
 
--- Tombol Start / Stop
+-- Tombol Start / Stop RunSummit
 antartikaTab:CreateButton({
     Name="Start Antartika Run",
     Callback=function()
@@ -144,5 +143,20 @@ antartikaTab:CreateButton({
         Rayfield:Notify({Title="Antartika", Content="⛔ RunSummit dihentikan!", Duration=4})
     end
 })
+
+-- Tombol langsung teleport ke Pos 1–5
+for i, pos in ipairs(positions) do
+    antartikaTab:CreateButton({
+        Name = "Teleport Pos "..i,
+        Callback = function()
+            TeleportTo(pos)
+            Rayfield:Notify({
+                Title = "Antartika Teleport",
+                Content = "✅ Teleported to Pos "..i,
+                Duration = 2
+            })
+        end
+    })
+end
 
 Rayfield:LoadConfiguration()
