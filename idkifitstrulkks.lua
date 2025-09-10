@@ -1,33 +1,31 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 -- Status fitur
 local antiFallDamageEnabled = true
 
--- Fungsi untuk setup character
+-- Fungsi setup karakter
 local function setupCharacter(character)
     local humanoid = character:WaitForChild("Humanoid")
-    
-    -- Anti fall damage
+    local root = character:WaitForChild("HumanoidRootPart")
+
+    -- Anti-fall damage
     humanoid.StateChanged:Connect(function(_, newState)
         if not antiFallDamageEnabled then return end
         if newState == Enum.HumanoidStateType.Freefall then
-            humanoid:SetAttribute("FallStartY", character:WaitForChild("HumanoidRootPart").Position.Y)
+            humanoid:SetAttribute("FallStartY", root.Position.Y)
         elseif newState == Enum.HumanoidStateType.Landed then
-            local startY = humanoid:GetAttribute("FallStartY") or character.HumanoidRootPart.Position.Y
-            local fallDistance = startY - character.HumanoidRootPart.Position.Y
-            if fallDistance > 20 then -- threshold jatuh
+            local startY = humanoid:GetAttribute("FallStartY") or root.Position.Y
+            local fallDistance = startY - root.Position.Y
+            if fallDistance > 20 and humanoid.Health > 0 then
                 humanoid.Health = humanoid.Health + humanoid.FloorMaterial
             end
         end
     end)
 end
 
--- Pasang script ketika karakter muncul / respawn
-player.CharacterAdded:Connect(function(char)
-    setupCharacter(char)
-end)
+-- Pasang setiap respawn
+player.CharacterAdded:Connect(setupCharacter)
 if player.Character then
     setupCharacter(player.Character)
 end
